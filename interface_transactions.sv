@@ -18,7 +18,7 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
     bit overflow [drvrs-1:0];
     bit reset;
     int tiempo_escritura;
-    int max_retardp;
+    int max_retardo;
 
     constraint const_escribir {escribir > 0; escribir < drvrs}
 
@@ -43,6 +43,11 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
       end
       this.reset = 0;
       this.tiempo_escritura = 0;
+    endfunction
+
+    function print;
+      $display("[%g] %s Tiempo=%g Reset=%g Retardo=%g Dato=%p Escritura=%p Overflow=%p",$time,tag,tiempo,this.reset, this.retardo, this.dato, this.escribir, this.overflow);
+      
     endfunction
 endclass
 
