@@ -7,8 +7,6 @@ class agent #(parameter pckg_sz = 16, drvrs = 4);
   trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaccion;
    
   function new();
-    num_transacciones = 6;
-    max_retardo = 5;
   endfunction
 
   task run;
@@ -23,7 +21,7 @@ class agent #(parameter pckg_sz = 16, drvrs = 4);
 
         case(instruccion.tipo_secuencia)
           sec_trans_aleatorias: begin // Esta instrucción genera una secuencia de instrucciones aleatorias
-            for(int i=0; i<num_transacciones;i++) begin
+            for(int i=0; i<this.num_transacciones;i++) begin 
               transaccion = new();
               transaccion.max_retardo = this.max_retardo;
               transaccion.randomize();

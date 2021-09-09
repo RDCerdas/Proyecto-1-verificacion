@@ -12,8 +12,7 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         test_agent_mbx_inst = new();
         ambiente_inst = new(test_agent_mbx_inst);
         ambiente_inst._if = _if;
-        ambiente_inst.agent_inst.num_transacciones = num_transacciones;
-        ambiente_inst.agent_inst.max_retardo = max_retardo;
+
 
     endfunction //new()
 
@@ -24,6 +23,8 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         join_none
 
         instruccion = new();
+      	instruccion.num_transacciones = num_transacciones;
+      	instruccion.max_retardo = max_retardo;
         instruccion.tipo_secuencia = sec_trans_aleatorias;
       test_agent_mbx_inst.put(instruccion);
       $display("[%g]  Test: Enviada primera instruccion al agente transacciones_aleatorias",$time);

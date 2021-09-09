@@ -23,7 +23,7 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
 
     constraint const_retardo {retardo <= max_retardo; retardo>= 0;}
 
-  constraint const_device_dest { foreach(device_dest[i]){device_dest[i] inside{[0:drvrs-1], {8{1'b1}}}};}
+  constraint const_device_dest { foreach(device_dest[i]){device_dest[i] inside{[0:drvrs-1], {8{1'b1}}}; device_dest[i] != i ;}}
 
   constraint reset_prop {reset dist{0:=80, 1:=20};}
 
@@ -57,7 +57,7 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
     endfunction
 
     function void print(string tag);
-      $display("[%g] %s Tiempo=%g Reset=%g Retardo=%g Dato=%p Escritura=%p Overflow=%p",$time,tag,tiempo_escritura,this.reset, this.retardo, this.dato, this.escribir, this.overflow);
+      $display("[%g] %s Tiempo=%g Reset=%g Retardo=%g Dato=%p Destino=%p Escritura=%p Overflow=%p",$time,tag,tiempo_escritura,this.reset, this.retardo, this.dato, this.device_dest, this.escribir, this.overflow);
       
     endfunction
 endclass

@@ -3,6 +3,7 @@ class driver_fifo #(parameter pckg_sz = 16, fifo_depth = 16);
     bit pop;
     bit pndng;
     bit overflow;
+	bit [pckg_sz-1:0] D_pop;
     bit [pckg_sz-1:0] emul_fifo [$];
     int identification;
 
@@ -15,28 +16,35 @@ class driver_fifo #(parameter pckg_sz = 16, fifo_depth = 16);
 
     endfunction //new()
 
-    function bit [pckg_sz-1:0] update();
+    function void update();
     	this.overflow = 0;
         if(pop) begin
             if(emul_fifo.size()==0) begin
-              $warning("[$g] Underflow in device %d fifo happened", $time, this.identification);
-            end else if (emul_fifo.size()==fifo_depth) begin
-                this.overflow = 1;
-              $warning("[$g] Overflow in device %d fifo happened", $time, this.identification);
-            end else
-                return emul_fifo.pop_front();
+              $warning("[%g] Underflow in device %d fifo happened", $time, this.identification);
+            end else begin
+              	
+                emul_fifo.pop_front();
+              	if(this.identification == 3) $display("[%g] Pop fron device, size %d", $time, emul_fifo.size());
+				this.D_pop = 0;
                 if((emul_fifo.size()==0)) pndng = 0;
-        end
+			end
+		end
         if(emul_fifo.size()==0)
-            return 0;
+            this.D_pop = 0;
         else
-            return emul_fifo[0];
+            this.D_pop = emul_fifo[0];
     endfunction
 
     function void write(bit [pckg_sz-1:0] dato, bit escribir);
       if (escribir) begin
-        emul_fifo.push_back(dato);
-        pndng = 1;
+        if(this.identification == 3) $display("[%g] Write on devide 3", $time);
+		if (emul_fifo.size()==fifo_depth) begin
+               this.overflow = 1;
+              $warning("[%g] Overflow in device %d fifo happened", $time, this.identification);
+        end else begin
+        	emul_fifo.push_back(dato);
+        	pndng = 1;
+      	end
       end
     endfunction
 
@@ -49,41 +57,50 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
     agent_driver_mbx i_agent_driver_mbx;
     driver_checker_mbx i_driver_checker_mbx;
   	int espera;
+  int espera_total;
 
     task run();
       $display("[%g]  El driver fue inicializado",$time);
       foreach (drivers_fifo[i]) begin
         drivers_fifo[i] = new(i);
       end
+      espera_total = 0;
+	  espera = 0;
       @(posedge vif.clk);
       vif.reset=1;
       @(posedge vif.clk);
+		
+	  forever begin
+       @(posedge vif.clk);
+       foreach (drivers_fifo[i]) begin
+		  drivers_fifo[i].pop = vif.pop[0][i];
+		  drivers_fifo[i].update();
+		  vif.D_pop[0][i] = drivers_fifo[i].D_pop;
+		  vif.pndng[0][i] = drivers_fifo[i].pndng;
+	  end
+        
+        if(espera >= espera_total)begin
+		  	trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction; 
+			vif.reset = 0;
+			espera = 0;
+			if (i_agent_driver_mbx.try_get(transaction)) begin
+				espera_total = transaction.retardo;
+				transaction.print("Driver: Transaccion recibida");
+				$display("Transacciones pendientes en el mbx agnt_drv = %g",i_agent_driver_mbx.num());
+				vif.reset = transaction.reset;
+				foreach (drivers_fifo[i]) drivers_fifo[i].write({transaction.device_dest[i], transaction.dato[i]}, transaction.escribir[i]);
+			end else begin
+				espera_total = 0;
+				vif.reset = 0;
+			end
+		end	
 
-      forever begin
-        trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction; 
-        vif.reset = 0;
-        $display("[%g] El Driver espera por una transacción",$time);
-        espera = 0;
-        @(posedge vif.clk);
-        i_agent_driver_mbx.get(transaction);
-        transaction.print("Driver: Transaccion recibida");
-        $display("Transacciones pendientes en el mbx agnt_drv = %g",i_agent_driver_mbx.num());
 
-        while(espera < transaction.retardo)begin
-          @(posedge vif.clk);
-          espera = espera+1;
-	    end
+	  
+	  espera = espera+1;
 
-        if(transaction.reset) begin
-            vif.reset = 1;
-        end
+    end
 
-        // Se actualiza las señales de entrada y salida de primero
-        foreach (drivers_fifo[i]) begin 
-          drivers_fifo[i].pop = vif.pop[0][i];
-          vif.D_pop[0][i] = drivers_fifo[i].update();
-            drivers_fifo[i].write({transaction.device_dest[i], transaction.dato[i]}, transaction.escribir[i]);
-        end
-      end
+
     endtask
 endclass //driver #parameter(parameter drvrs = 4, pckg_sz = 16, bits = 0)
