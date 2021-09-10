@@ -2,6 +2,7 @@
 
 //`include "Library.sv"
 `include "interface_transactions.sv"
+`include "monitor.sv"
 `include "driver.sv"
 `include "agent.sv"
 `include "ambiente.sv"
@@ -37,6 +38,7 @@ module test_bench;
         t0 = new();
         t0._if = _if;
       	t0.ambiente_inst.driver_inst.vif = _if;
+        t0.ambiente_inst.monitor_inst.vif = _if;
         fork
             t0.run();
         join_none

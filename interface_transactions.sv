@@ -5,7 +5,9 @@
 // Tipos de operaciones
 typedef enum {escritura, reset} tipo_trans; 
 // Tipos de secuencias
-typedef enum {trans_aleatoria, trans_especifica, sec_trans_aleatorias, sec_trans_especificas, sec_escrituras_aleatorias} tipo_sec;
+typedef enum {trans_aleatoria, trans_especifica, sec_trans_aleatorias, sec_trans_especificas, sec_escrituras_aleatorias, escritura_aleatoria} tipo_sec;
+// Operaciones en Scoreboard
+typedef enum {report_consola, retraso_promedio, reset_ancho_banda, ancho_banda, report_csv, append_txt_min_bw, append_txt_max_bw} sb_transaction;
 
 
 // Definicion de los paquetes
@@ -21,11 +23,11 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
     int max_retardo;
 
 
-    constraint const_retardo {retardo <= max_retardo; retardo>= 0;}
+    constraint const_retardo {retardo <= max_retardo; retardo> 0;}
 
-  constraint const_device_dest { foreach(device_dest[i]){device_dest[i] inside{[0:drvrs-1], {8{1'b1}}}; device_dest[i] != i ;}}
+  constraint const_device_dest { foreach(device_dest[i]){device_dest[i] inside{[0:drvrs-1], {8{1'b1}}}; device_dest[i]!=i;}}
 
-  constraint reset_prop {reset dist{0:=80, 1:=20};}
+  constraint reset_prop {reset dist{0:=80, 1:=0};}
 
   constraint escribir_prop {foreach(escribir[i])escribir[i] dist{0:=70, 1:=30};}
 
@@ -77,7 +79,7 @@ endinterface //bus_if
 
 // Paquete monitor-checker
 class monitor_checker #(parameter pckg_sz = 16, drvrs = 4);
-    bit [pckg_sz-9:0] dato [drvrs-1:0];
+    bit [pckg_sz-1:0] dato [drvrs-1:0];
     bit valid [drvrs-1:0];
     int tiempo_lectura;
 
@@ -88,6 +90,11 @@ class monitor_checker #(parameter pckg_sz = 16, drvrs = 4);
         end
         this.tiempo_lectura = 0;
     endfunction 
+	
+	function void print(string tag);
+      $display("[%g] %s Tiempo=%g Dato=%p Valido=%p",$time,tag,tiempo_lectura, this.dato, this.valid);
+      
+    endfunction
 endclass
 
 // Definicion del paquete entre checker y scoreboard
@@ -130,6 +137,7 @@ class test_agent #(parameter pckg_sz = 16, drvrs = 4);
     bit [7:0] spec_device_dest [drvrs-1:0];
     int max_retardo;
     int num_transacciones;
+    bit reset;
 
   function new(tipo_sec t_sec = trans_aleatoria, int ret = 0);
       this.tipo_secuencia = t_sec;
@@ -141,9 +149,17 @@ class test_agent #(parameter pckg_sz = 16, drvrs = 4);
       end
       this.max_retardo = 5;
       this.num_transacciones = 6;
+      this.reset = 0;
 
       
     endfunction
+
+  // Funcion para escribir desde y hasta canal deseado
+  function void enviar_dato_especifico(int device_salida, bit [pckg_sz-9:0] dato, bit [7:0] device_dest);
+    this.spec_dato[device_salida] = dato;
+    this.spec_escribir[device_salida] = 1;
+    this.spec_device_dest[device_salida] = device_dest;
+  endfunction
 
 
 endclass
@@ -165,3 +181,6 @@ typedef mailbox #(checker_scoreboard) checker_scoreboard_mbx;
 
 // Mailbox entre agente y test
 typedef mailbox #(test_agent) test_agent_mbx;
+
+// Mailbox entre test y scoreboard
+typedef mailbox #(sb_transaction) test_sb_mbx;
