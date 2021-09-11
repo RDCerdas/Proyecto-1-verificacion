@@ -107,7 +107,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
             valid_transaction = 1;
         end
 
-        reset_temp = vif.reset;
+
 
         // En caso de que se detecte pop se hace transacción hacia checker 
         if(valid_transaction) begin
@@ -119,13 +119,15 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
             transaction_checker.escribir[i] = this.vif.pop[0][i];
           end
             transaction_checker.tiempo_escritura = $time;
-            transaction_checker.reset = vif.reset;
+            transaction_checker.reset = reset_temp;
             transaction_checker.print("Driver: Transaccion enviada a Checker");
             i_driver_checker_mbx.put(transaction_checker);
         end
 
           
-        if(espera >= espera_total) begin
+        reset_temp = vif.reset;
+        
+	if(espera >= espera_total) begin
           trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction; 
           vif.reset = 0;
           espera = 0;
