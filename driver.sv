@@ -71,6 +71,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
     bit [pckg_sz-1:0] dato_temp [drvrs-1:0];
   	int espera;
     int espera_total;
+    bit reset_temp;
     int valid_transaction;
 
     task run();
@@ -80,6 +81,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
       end
       espera_total = 0;
 	    espera = 0;
+      reset_temp = 0;
       @(posedge vif.clk);
       vif.reset=1;
       @(posedge vif.clk);
@@ -96,7 +98,16 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
           vif.pndng[0][i] = drivers_fifo[i].pndng;
         end
 
-        foreach (drivers_fifo[i]) if (vif.pop[0][i]) valid_transaction = 1;
+        foreach (drivers_fifo[i]) begin 
+          // Si hay algún pop
+          if (vif.pop[0][i]) 
+            valid_transaction = 1;
+          // Detector de flancos
+          if (~vif.reset && reset_temp)
+            valid_transaction = 1;
+        end
+
+        reset_temp = vif.reset;
 
         // En caso de que se detecte pop se hace transacción hacia checker 
         if(valid_transaction) begin
