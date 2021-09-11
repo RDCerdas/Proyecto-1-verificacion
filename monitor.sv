@@ -31,7 +31,7 @@ class monitor#(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
                     transaction.valid[i] = this.push[i];
                     transaction.dato[i] = this.D_push[i];
                 end
-                transaction.tiempo_lectura = $time();
+                transaction.tiempo_escritura = $time();
                 transaction.print("Monitor: Transaccion enviada");
                 i_monitor_checker_mbx.put(transaction);
             end

@@ -19,7 +19,7 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
     rand bit escribir [drvrs-1:0];
     bit overflow [drvrs-1:0];
     rand bit reset;
-    int tiempo_escritura;
+    int tiempo_lectura;
     int max_retardo;
 
 
@@ -37,7 +37,7 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
         this.overflow[i] = 0;
       end
       this.reset = rst;
-      this.tiempo_escritura = 0;
+      this.tiempo_lectura = 0;
       this.max_retardo = 5;
     
       foreach (dato[i]) begin
@@ -55,11 +55,11 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
           this.overflow[i] = 0;
       end
       this.reset = 0;
-      this.tiempo_escritura = 0;
+      this.tiempo_lectura = 0;
     endfunction
 
     function void print(string tag);
-      $display("[%g] %s Tiempo=%g Reset=%g Retardo=%g Dato=%p Destino=%p Escritura=%p Overflow=%p",$time,tag,tiempo_escritura,this.reset, this.retardo, this.dato, this.device_dest, this.escribir, this.overflow);
+      $display("[%g] %s Tiempo=%g Reset=%g Retardo=%g Dato=%p Destino=%p Escritura=%p Overflow=%p",$time,tag,tiempo_lectura,this.reset, this.retardo, this.dato, this.device_dest, this.escribir, this.overflow);
       
     endfunction
 endclass
@@ -81,18 +81,18 @@ endinterface //bus_if
 class monitor_checker #(parameter pckg_sz = 16, drvrs = 4);
     bit [pckg_sz-1:0] dato [drvrs-1:0];
     bit valid [drvrs-1:0];
-    int tiempo_lectura;
+    int tiempo_escritura;
 
     function new();
         for(int i = 0; i<drvrs; i++) begin
           this.dato[i] = 0; 
           this.valid[i] = 0;
         end
-        this.tiempo_lectura = 0;
+        this.tiempo_escritura = 0;
     endfunction 
 	
 	function void print(string tag);
-      $display("[%g] %s Tiempo=%g Dato=%p Valido=%p",$time,tag,tiempo_lectura, this.dato, this.valid);
+      $display("[%g] %s Tiempo=%g Dato=%p Valido=%p",$time,tag,tiempo_escritura, this.dato, this.valid);
       
     endfunction
 endclass

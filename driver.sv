@@ -118,7 +118,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
             transaction_checker.device_dest[i] = this.dato_temp[i][pckg_sz-1:pckg_sz-8];
             transaction_checker.escribir[i] = this.vif.pop[0][i];
           end
-            transaction_checker.tiempo_escritura = $time;
+            transaction_checker.tiempo_lectura = $time;
             transaction_checker.reset = reset_temp;
             transaction_checker.print("Driver: Transaccion enviada a Checker");
             i_driver_checker_mbx.put(transaction_checker);
