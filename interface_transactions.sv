@@ -104,6 +104,8 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
     int latencia;
     int device_dest;
     int device_env;
+  int valido;
+  int completado;
     bit [pckg_sz-1:0] dato;
     tipo_trans tipo;
 
@@ -115,10 +117,13 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
       this.device_env = dev_env;
       this.device_dest = dev_dest;
       this.tipo = tp;
-      
+      this.completado=0;
+      this.valido=0;
     endfunction
 
     function clean();
+      this.completado=0;
+      this.valido=0;
       this.dato = 0;
       this.tiempo_escritura = 0;
       this.tiempo_lectura = 0;
