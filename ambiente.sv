@@ -37,7 +37,7 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
     checker_inst.i_monitor_checker_mbx=monitor_checker_mbx_inst;
     score_board_inst.i_checker_scoreboard_mbx=checker_scoreboard_mbx_inst;
     checker_inst.i_checker_scoreboard_mbx=checker_scoreboard_mbx_inst;
-   
+    score_board_inst.i_test_sb_mbx=test_sb_mbx_i;
        
        	
 
