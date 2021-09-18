@@ -4,7 +4,8 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
      driver #(.drvrs(drvrs), .pckg_sz(pckg_sz), .bits(bits), .fifo_depth(fifo_depth)) driver_inst;
      agent #(.drvrs(drvrs), .pckg_sz(pckg_sz)) agent_inst;
      monitor #(.drvrs(drvrs), .pckg_sz(pckg_sz), .bits(bits), .fifo_depth(fifo_depth)) monitor_inst;
-
+     checker1#(.pckg_sz(pckg_sz), .drvrs(drvrs)) checker_inst;
+  	 score_board #(.pckg_sz(pckg_sz), .drvrs(drvrs)) score_board_inst;
      agent_driver_mbx agent_driver_mbx_inst;
      driver_checker_mbx driver_checker_mbx_inst;
      monitor_checker_mbx monitor_checker_mbx_inst;
@@ -22,6 +23,8 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
       driver_inst = new();
       agent_inst = new();
       monitor_inst = new();
+    score_board_inst=new();
+    checker_inst=new();
 
       // Conexion de las interfaces y los mailboces
       driver_inst.vif = _if;
@@ -30,6 +33,11 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
       monitor_inst.i_monitor_checker_mbx = monitor_checker_mbx_inst;
       agent_inst.i_test_agent_mbx = t_a_mbx;
       agent_inst.i_agent_driver_mbx = agent_driver_mbx_inst;
+    checker_inst.i_driver_checker_mbx=driver_checker_mbx_inst;
+    checker_inst.i_monitor_checker_mbx=monitor_checker_mbx_inst;
+    score_board_inst.i_checker_scoreboard_mbx=checker_scoreboard_mbx_inst;
+    checker_inst.i_checker_scoreboard_mbx=checker_scoreboard_mbx_inst;
+   
        
        	
 
@@ -41,6 +49,8 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
             driver_inst.run();
             agent_inst.run();
             monitor_inst.run();
+          checker_inst.run();
+          score_board_inst.run();
         join_none
      endtask
 endclass
