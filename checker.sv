@@ -57,7 +57,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
        end
      end
      if (transaction_driver.reset==1) begin
-       for (int i=0;i<size(cola); i++) begin
+       for (int i=0;i<cola.size; i++) begin
          auxiliar=cola.pop_back;
          to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
          to_sb.tiempo_escritura=0;
