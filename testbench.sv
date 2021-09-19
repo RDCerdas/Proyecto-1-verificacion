@@ -7,6 +7,8 @@
 `include "agent.sv"
 `include "ambiente.sv"
 `include "test.sv"
+`include "checker.sv"
+`include "scoreboard.sv"
 
 module test_bench;
     reg clk;
