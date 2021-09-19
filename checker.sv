@@ -10,11 +10,10 @@ class arreglo #(parameter pckg_sz = 16);
 
 endclass 
 
-class checker#(parameter drvrs = 4, pckg_sz = 16);
+class checkers #(parameter drvrs = 4, pckg_sz = 16);
   trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction_driver;
   monitor_checker #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction_monitor;
   checker_scoreboard #(.pckg_sz(pckg_sz), .drvrs(drvrs)) to_sb;
-  checker_scoreboard #(.pckg_sz(pckg_sz), .drvrs(drvrs)) abort;
   monitor_checker_mbx i_monitor_checker_mbx;
   driver_checker_mbx i_driver_checker_mbx;
   checker_scoreboard_mbx i_checker_scoreboard_mbx;
@@ -22,9 +21,7 @@ class checker#(parameter drvrs = 4, pckg_sz = 16);
   arreglo temp;
   arreglo cola[$];
   int latencia;
-  int valido;
   int tamaño;
-  
   bit [pckg_sz-9:0] Dato;
   bit [8:0] destino;
   
@@ -45,7 +42,6 @@ class checker#(parameter drvrs = 4, pckg_sz = 16);
      to_sb.clean();
      foreach (transaction_driver.escribir[i]) begin
        if (transaction_driver.escribir[i]==1) begin
-
          if (transaction_driver.device_dest[i]==8'hFF) begin
            for (int f=0; f<drvrs-1; f++) begin
          		temp.enviado=i;
@@ -53,7 +49,6 @@ class checker#(parameter drvrs = 4, pckg_sz = 16);
          		temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
          		temp.tiempo_lectura=transaction_driver.tiempo_lectura;
          		cola.push_back(arreglo);
-           
            end
          end else begin
          temp.enviado=i;
@@ -64,56 +59,51 @@ class checker#(parameter drvrs = 4, pckg_sz = 16);
          end
        end
      end
-     monitor_checker.get(transaction_monitor);
      if (transaction_driver.reset_temp==1) begin
        for (int i=0;i<size(cola); i++) begin
          auxiliar=cola.pop_back;
-         abort.device_dest=transaction_monitor.dato[pckg_sz-1:pckg_sz-8];
-         abort.device_env=cola.enviado;
-           to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
-           to_sb.tiempo_escritura=0;
-           to_sb.device_dest=auxiliar.Dato[pckg_sz-1:pckg_sz-8];
-           to_sb.latencia=0;
-           to_sb.tiempo_lectura=auxiliar.tiempo_lectura;
-           to_sb.completado = 0;
-         to_sb.valido=0
-           to_sb.device_env=auxiliar.enviado;
-           to_sb.print("Checker:Transaccion Completada");
-           i_checker_scoreboard_mbx.put(to_sb);
-         $display("Dato_abortado= %h, Dispositivo_que_envia = %h, Dispositivo que recibe= %h",cola.dato,abort.device_env,abort.device_dest);
+         to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
+         to_sb.tiempo_escritura=0;
+         to_sb.device_dest=auxiliar.Dato[pckg_sz-1:pckg_sz-8];
+         to_sb.latencia=0;
+         to_sb.tiempo_lectura=auxiliar.tiempo_lectura;
+         to_sb.completado = 0;
+         to_sb.valido=0;
+         to_sb.device_env=auxiliar.enviado;
+         to_sb.print("Checker:Transaccion Completada");
+         i_checker_scoreboard_mbx.put(to_sb);
+         $display("Dato_abortado= %h, Dispositivo_que_envia = %h, Dispositivo que recibe= %h",auxiliar.Dato[pckg_sz-9:0],auxiliar.enviado,auxiliar.Dato[pckg_sz-1:pckg_sz-8);
        end
      end else begin 
+       monitor_checker.get(transaction_monitor);
        foreach (transaction_monitor.valid[i]) begin
-       if (transaction_monitor.valid[i]==1) begin
-         Dato=transaction_monitor.dato[i];
-         tamaño=0
-       foreach (cola[a]) begin
-         
-         if (Dato==cola[a].Dato) begin
-           latencia = cola.tiempo_lectura[a] - transaction_monitor.tiempo_escritura;
-           to_sb.dato=Dato;
-           to_sb.tiempo_escritura=transaction_monitor.tiempo_escritura;
-           to_sb.device_dest=transaction_monitor.dato[7:0];
-           to_sb.latencia=latencia;
-           to_sb.tiempo_lectura=cola.tiempo_lectura[a];
-           to_sb.completado = 1;
-           to_sb.valido=1
-           to_sb.device_env=cola.enviado;
-           to_sb.print("Checker:Transaccion Completada");
-           i_checker_scoreboard_mbx.put(to_sb);
-           tamaño=1;
-         end 
-
-       end
+         if (transaction_monitor.valid[i]==1) begin
+           Dato=transaction_monitor.dato[i];
+           tamaño=0;
+           foreach (cola[a]) begin
+           	 if (Dato==cola[a].Dato) begin
+           	   latencia = cola.tiempo_lectura[a] - transaction_monitor.tiempo_escritura;
+           	   to_sb.dato=Dato;
+           	   to_sb.tiempo_escritura=transaction_monitor.tiempo_escritura;
+               to_sb.device_dest=transaction_monitor.dato[7:0];
+           	   to_sb.latencia=latencia;
+           	   to_sb.tiempo_lectura=cola.tiempo_lectura[a];
+           	   to_sb.completado = 1;
+           	   to_sb.valido=1;
+           	   to_sb.device_env=cola.enviado;
+           	   to_sb.print("Checker:Transaccion Completada");
+           	   i_checker_scoreboard_mbx.put(to_sb);
+           	   tamaño=1;
+             end
+           end
            if (tamaño==0) begin
-           transaction_driver.print("Checker: El dato recibido por el monitor no fue enviado por el driver");
-         $finish;
-       end
-
+           	 transaction_driver.print("Checker: El dato recibido por el monitor no fue enviado por el driver");
+         	 $finish;
+           end
+         end
        end
      end
-   end
+     end
+     endtask 
    
-
-   endtask
 endclass 

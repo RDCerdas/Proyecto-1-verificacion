@@ -4,7 +4,7 @@ class ambiente #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
      driver #(.drvrs(drvrs), .pckg_sz(pckg_sz), .bits(bits), .fifo_depth(fifo_depth)) driver_inst;
      agent #(.drvrs(drvrs), .pckg_sz(pckg_sz)) agent_inst;
      monitor #(.drvrs(drvrs), .pckg_sz(pckg_sz), .bits(bits), .fifo_depth(fifo_depth)) monitor_inst;
-     checker1#(.pckg_sz(pckg_sz), .drvrs(drvrs)) checker_inst;
+     checkers #(.drvrs(drvrs), .pckg_sz(pckg_sz)) checker_inst;
   	 score_board #(.pckg_sz(pckg_sz), .drvrs(drvrs)) score_board_inst;
      agent_driver_mbx agent_driver_mbx_inst;
      driver_checker_mbx driver_checker_mbx_inst;
