@@ -10,7 +10,7 @@ class arreglo #(parameter pckg_sz = 16);
 
 endclass 
 
-class checkers #(parameter drvrs = 4, pckg_sz = 16);
+class checkers #(parameter drvrs = 4,  pckg_sz = 16);
   trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction_driver;
   monitor_checker #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction_monitor;
   checker_scoreboard #(.pckg_sz(pckg_sz), .drvrs(drvrs)) to_sb;
@@ -34,12 +34,9 @@ class checkers #(parameter drvrs = 4, pckg_sz = 16);
   
   task run;
    $display("[%g]  El checker fue inicializado",$time);
-   to_sb = new();
    forever begin
-     to_sb = new();
      i_driver_checker_mbx.get(transaction_driver);
      transaction_driver.print("Checker: Se recibe trasacción desde el driver");
-     to_sb.clean();
      foreach (transaction_driver.escribir[i]) begin
        if (transaction_driver.escribir[i]==1) begin
          if (transaction_driver.device_dest[i]==8'hFF) begin
@@ -59,7 +56,7 @@ class checkers #(parameter drvrs = 4, pckg_sz = 16);
          end
        end
      end
-     if (transaction_driver.reset_temp==1) begin
+     if (transaction_driver.reset==1) begin
        for (int i=0;i<size(cola); i++) begin
          auxiliar=cola.pop_back;
          to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
@@ -82,15 +79,15 @@ class checkers #(parameter drvrs = 4, pckg_sz = 16);
            tamano=0;
            foreach (cola[a]) begin
            	 if (Dato==cola[a].Dato) begin
-           	   latencia = cola.tiempo_lectura[a] - transaction_monitor.tiempo_escritura;
+           	   latencia = cola[a].tiempo_lectura - transaction_monitor.tiempo_escritura;
            	   to_sb.dato=Dato;
            	   to_sb.tiempo_escritura=transaction_monitor.tiempo_escritura;
                to_sb.device_dest=transaction_monitor.dato[7:0];
            	   to_sb.latencia=latencia;
-           	   to_sb.tiempo_lectura=cola.tiempo_lectura[a];
+           	   to_sb.tiempo_lectura=cola[a].tiempo_lectura;
            	   to_sb.completado = 1;
            	   to_sb.valido=1;
-           	   to_sb.device_env=cola.enviado;
+           	   to_sb.device_env=cola[a].enviado;
            	   to_sb.print("Checker:Transaccion Completada");
            	   i_checker_scoreboard_mbx.put(to_sb);
            	   tamano=1;

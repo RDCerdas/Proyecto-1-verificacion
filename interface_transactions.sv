@@ -104,8 +104,8 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
     int latencia;
     int device_dest;
     int device_env;
-  int valido;
-  int completado;
+  	int valido;
+  	int completado;
     bit [pckg_sz-1:0] dato;
     tipo_trans tipo;
 
@@ -131,6 +131,10 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
       this.device_dest = 0;
       this.device_env = 0;
       this.tipo = 0;
+    endfunction
+      function void print(string tag);
+        $display("[%g] %s Dato=%g Destino=%g Fuente=%g Valido=%p Completado=%p Escritura=%p Lectura=%p Latencia=%p",,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
+      
     endfunction
 endclass
 
