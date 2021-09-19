@@ -7,7 +7,7 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
   checker_scoreboard auxiliar_array[$];  
   checker_scoreboard auxiliar_trans;
   shortreal retardo_promedio;
-  solicitud_sb orden;
+  sb_transaction orden;
   int tamano_sb = 0;
   int transacciones_completadas =0;
   int retardo_total = 0;
