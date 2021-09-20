@@ -7,7 +7,7 @@ typedef enum {escritura, reset} tipo_trans;
 // Tipos de secuencias
 typedef enum {trans_aleatoria, trans_especifica, sec_trans_aleatorias, sec_trans_especificas, sec_escrituras_aleatorias, escritura_aleatoria} tipo_sec;
 // Operaciones en Scoreboard
-typedef enum {retraso_promedio, reset_ancho_banda, report_csv, append_csv_min_bw, append_txt_max_bw} sb_transaction;
+typedef enum {retraso_promedio, reset_ancho_banda, report_csv, append_csv_min_bw, append_csv_max_bw} sb_transaction;
 
 
 // Definicion de los paquetes

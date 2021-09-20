@@ -63,21 +63,25 @@ int file_max_bw;
             reset_ancho_banda: begin
               reset_bw = 1;
               transacciones_completados_bw = 0;
-              tiempo_inicial_bw = 0;
+
+              $display("[%g] reset_a_b", $time);
+	      tiempo_inicial_bw = 0;
               tiempo_final_bw = 0;
             end
             append_csv_min_bw: begin
               
               file_min_bw = $fopen("min_bandwidth.csv", "a");
-              $fwrite(file_min_bw, "Drivers; Pck_sz; Minimun Bandwidth(Gbps)\n");
-              $fwrite(file_min_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
-              $fclose(file_min_bw);
+              $fwrite(file_min_bw, "Drivers; Pck_sz; Minimun Bandwidth(Mbps)\n");
+              $fwrite(file_min_bw, "%d; %d; %f; %d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw), tiempo_final_bw, tiempo_inicial_bw, transacciones_completados_bw);
+              $display("[%g] csv min", $time);
+	      $fclose(file_min_bw);
             end
-            append_txt_max_bw: begin
-              
+            append_csv_max_bw: begin
+		$display("cvs max antes");
               file_max_bw = $fopen("max_bandwidth.csv", "a");
-              $fwrite(file_max_bw, "Drivers; Pck_sz; Mi Bandwidth(Gbps)\n");
-              $fwrite(file_max_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
+              $display("cvs max");
+	      $fwrite(file_max_bw, "Drivers; Pck_sz; Max Bandwidth(Mbps)\n");
+              $fwrite(file_max_bw, "%d; %d; %f; %d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw), tiempo_final_bw, tiempo_inicial_bw, transacciones_completados_bw);
               $fclose(file_max_bw);
             end
           endcase

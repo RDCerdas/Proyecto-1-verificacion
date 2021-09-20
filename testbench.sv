@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-//`include "Library.sv"
+`include "Library.sv"
 `include "interface_transactions.sv"
 `include "monitor.sv"
 `include "driver.sv"
@@ -48,7 +48,7 @@ module test_bench;
     end
 
     always@(posedge clk) begin
-        if ($time > 100000)begin
+        if ($time > 10000000)begin
             $display("Test_bench: Tiempo límite de prueba en el test_bench alcanzado");
             $finish;
     end
