@@ -5,10 +5,11 @@
 `include "monitor.sv"
 `include "driver.sv"
 `include "agent.sv"
-`include "ambiente.sv"
-`include "test.sv"
 `include "checker.sv"
 `include "scoreboard.sv"
+`include "ambiente.sv"
+`include "test.sv"
+
 
 module test_bench;
     reg clk;
