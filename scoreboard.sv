@@ -48,7 +48,7 @@ int file_max_bw;
               $display("Score Board: Recibida Orden Reporte");
               tamano_sb = this.scoreboard.size();
               
-              report_csv_file = $fopen("min_bandwidth.csv", "w");
+              report_csv_file = $fopen("report.csv", "w");
               $fwrite(report_csv_file, "Dato; Destino; Fuente; Valido; Completado; Escritura; Lectura; Latencia\n");
 
               for(int i=0;i<tamano_sb;i++) begin

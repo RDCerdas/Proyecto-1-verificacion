@@ -1,7 +1,7 @@
 class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
     test_agent_mbx test_agent_mbx_inst;
     test_sb_mbx test_sb_mbx_inst;
-    parameter num_transacciones = 4;
+    parameter num_transacciones = 25;
     parameter max_retardo = 7;
     test_agent #(.pckg_sz(pckg_sz), .drvrs(drvrs)) instruccion;
     
@@ -56,6 +56,9 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         test_agent_mbx_inst.put(instruccion);
         $display("[%g]  Test: Enviada cuarta instruccion al agente escrituras_aleatorias",$time);
 
+	#100000;
+	
+	test_sb_mbx_inst.put(report_csv);
     endtask
 
 endclass //test 

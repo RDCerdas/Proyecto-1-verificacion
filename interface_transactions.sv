@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////
-// Definición del tipo de transacciones posibles en la fifo //
+// Definici�n del tipo de transacciones posibles en la fifo //
 //////////////////////////////////////////////////////////////
 
 // Tipos de operaciones
@@ -133,7 +133,7 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
       this.tipo = 0;
     endfunction
       function void print(string tag);
-        $display("[%g] %s Dato=%g Destino=%g Fuente=%g Valido=%g Completado=%g Escritura=%g Lectura=%g Latencia=%g",,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
+        $display("[%g] %s Dato=%h Destino=%g Fuente=%g Valido=%g Completado=%g Escritura=%g Lectura=%g Latencia=%g", $time() ,tag ,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
       
     endfunction
 endclass
