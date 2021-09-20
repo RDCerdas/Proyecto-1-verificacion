@@ -1,7 +1,7 @@
 Command: vcs -Mupdate parameters.sv testbench.sv -o salida -full64 -sverilog -kdb \
 -debug_acc+all -debug_region+cell+encrypt -l log_test +lint=TFIPC-L
                          Chronologic VCS (TM)
-       Version R-2020.12-SP2_Full64 -- Mon Sep 20 15:15:19 2021
+       Version R-2020.12-SP2_Full64 -- Mon Sep 20 15:22:52 2021
 
                     Copyright (c) 1991 - 2021 Synopsys, Inc.
    This software and the associated documentation are proprietary to Synopsys,
@@ -122,7 +122,7 @@ make[1]: warning:  Clock skew detected.  Your build may be incomplete.
 if [ -x ../salida ]; then chmod a-x ../salida; fi
 g++  -o ../salida      -rdynamic  -Wl,-rpath='$ORIGIN'/salida.daidir -Wl,-rpath=./salida.daidir \
 -Wl,-rpath=/mnt/vol_NFS_rh003/tools/vcs/R-2020.12-SP2/linux64/lib -L/mnt/vol_NFS_rh003/tools/vcs/R-2020.12-SP2/linux64/lib \
--Wl,-rpath-link=./  /usr/lib64/libnuma.so.1     _1777320_archive_1.so _prev_archive_1.so \
+-Wl,-rpath-link=./  /usr/lib64/libnuma.so.1     _1784323_archive_1.so _prev_archive_1.so \
 _cuarc0.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o \
 rmar_llvm_0_0.o           -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile \
 -luclinative /mnt/vol_NFS_rh003/tools/vcs/R-2020.12-SP2/linux64/lib/vcs_tls.o   -Wl,-whole-archive \
@@ -131,5 +131,5 @@ rmar_llvm_0_0.o           -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -ls
 -lm -lpthread -ldl 
 ../salida up to date
 make: warning:  Clock skew detected.  Your build may be incomplete.
-CPU time: 1.096 seconds to compile + .488 seconds to elab + .373 seconds to link
+CPU time: 1.124 seconds to compile + .496 seconds to elab + .342 seconds to link
 Verdi KDB elaboration done and the database successfully generated: 0 error(s), 0 warning(s)
