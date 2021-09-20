@@ -49,12 +49,12 @@ int file_max_bw;
               tamano_sb = this.scoreboard.size();
               
               report_csv_file = $fopen("report.csv", "w");
-              $fwrite(report_csv_file, "Dato; Destino; Fuente; Reset; Valido; Completado; Escritura; Lectura; Latencia\n");
+              $fwrite(report_csv_file, "Dato,Destino,Fuente,Reset,Valido,Completado,Escritura,Lectura,Latencia\n");
 
               for(int i=0;i<tamano_sb;i++) begin
                 auxiliar_trans = scoreboard.pop_front;
                 auxiliar_trans.print("SB_Report:");
-                $fwrite(report_csv_file, "%g; %g; %g, %g; %g; %g; %g; %g; %g\n",auxiliar_trans.dato,auxiliar_trans.device_dest, auxiliar_trans.device_env, auxiliar_trans.reset, auxiliar_trans.valido, auxiliar_trans.completado, auxiliar_trans.tiempo_escritura, auxiliar_trans.tiempo_lectura, auxiliar_trans.latencia);
+                $fwrite(report_csv_file, "%0g, %0g, %0g, %0g, %0g, %0g, %0g, %0g, %0g\n",auxiliar_trans.dato,auxiliar_trans.device_dest, auxiliar_trans.device_env, auxiliar_trans.reset, auxiliar_trans.valido, auxiliar_trans.completado, auxiliar_trans.tiempo_escritura, auxiliar_trans.tiempo_lectura, auxiliar_trans.latencia);
               end
 
               $fclose(report_csv_file);
@@ -70,12 +70,12 @@ int file_max_bw;
             append_csv_min_bw: begin
               
               file_min_bw = $fopen("min_bandwidth.csv", "a");
-              $fwrite(file_min_bw, "\n%d; %d; %f", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw), tiempo_final_bw, tiempo_inicial_bw, transacciones_completados_bw);
+              $fwrite(file_min_bw, "\n%0d,%0d,%0.3f", drvrs, fifo_depth, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw));
 	      $fclose(file_min_bw);
             end
             append_csv_max_bw: begin
               file_max_bw = $fopen("max_bandwidth.csv", "a");
-              $fwrite(file_max_bw, "\n%d; %d; %f", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw));
+              $fwrite(file_max_bw, "\n%0d,%0d,%0.3f", drvrs, fifo_depth, (transacciones_completados_bw*pckg_sz*1000)/(tiempo_final_bw-tiempo_inicial_bw));
               $fclose(file_max_bw);
             end
           endcase

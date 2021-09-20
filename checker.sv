@@ -21,9 +21,9 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
   monitor_checker_mbx i_monitor_checker_mbx;
   driver_checker_mbx i_driver_checker_mbx;
   checker_scoreboard_mbx i_checker_scoreboard_mbx;
-  arreglo auxiliar;
-  arreglo temp;
-  arreglo cola[$];
+  arreglo #(.pckg_sz(pckg_sz)) auxiliar;
+  arreglo #(.pckg_sz(pckg_sz))temp;
+  arreglo #(.pckg_sz(pckg_sz))cola[$];
   int latencia;
   int tamano;
   bit [pckg_sz-1:0] Dato;
@@ -48,7 +48,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
            Dato=transaction_monitor.dato[i];
            tamano=0;
            foreach (cola[a]) begin
-
+		  $display("Dato = %h Cola = %h", Dato, cola[a].Dato);
 		  if (Dato==cola[a].Dato) begin
 
 		   to_sb = new();
@@ -71,7 +71,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
            end
            if (tamano==0) begin
            	 transaction_monitor.print("Checker: El dato recibido por el monitor no fue enviado por el driver");
-         	   $finish;
+         	   $finish(1);
            end
    	end
          end
@@ -122,7 +122,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
     foreach (cola[a]) begin
 	    if(cola[a].tiempo_lectura+timeout < $time) begin
         cola[a].print("Checker: Error timeout de dato");
-        $finish;
+        $finish(1);
 end
     end
   end
