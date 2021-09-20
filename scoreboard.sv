@@ -14,7 +14,9 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
   int tiempo_inicial_bw = 0;
   int tiempo_final_bw = 0;
   int reset_bw = 0;
-
+int report_csv_file;
+int file_min_bw;
+int file_max_bw;
     task run;
     $display("[%g] El Score Board fue inicializado",$time);
     forever begin
@@ -45,7 +47,7 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
             report_csv: begin
               $display("Score Board: Recibida Orden Reporte");
               tamano_sb = this.scoreboard.size();
-              int report_csv_file;
+              
               report_csv_file = $fopen("min_bandwidth.csv", "w");
               $fwrite(report_csv_file, "Dato; Destino; Fuente; Valido; Completado; Escritura; Lectura; Latencia\n");
 
@@ -65,14 +67,14 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
               tiempo_final_bw = 0;
             end
             append_csv_min_bw: begin
-              int file_min_bw;
+              
               file_min_bw = $fopen("min_bandwidth.csv", "a");
               $fwrite(file_min_bw, "Drivers; Pck_sz; Minimun Bandwidth(Gbps)\n");
               $fwrite(file_min_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
               $fclose(file_min_bw);
             end
             append_txt_max_bw: begin
-              int file_max_bw;
+              
               file_max_bw = $fopen("max_bandwidth.csv", "a");
               $fwrite(file_max_bw, "Drivers; Pck_sz; Mi Bandwidth(Gbps)\n");
               $fwrite(file_max_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
