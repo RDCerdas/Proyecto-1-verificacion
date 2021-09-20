@@ -24,6 +24,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
   int tamano;
   bit [pckg_sz-1:0] Dato;
   bit [8:0] destino;
+  int timeout = 5000;
   
   function new();
    this.cola = {};
@@ -35,7 +36,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
   task run;
    $display("[%g]  El checker fue inicializado",$time);
    forever begin
-	   #3;
+	   #5;
 	   
 	if(i_monitor_checker_mbx.try_get(transaction_monitor)) begin
        foreach (transaction_monitor.valid[i]) begin
@@ -66,7 +67,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
            end
            if (tamano==0) begin
            	 transaction_monitor.print("Checker: El dato recibido por el monitor no fue enviado por el driver");
-         	 $finish;
+         	   $finish;
            end
    	end
          end
@@ -77,43 +78,48 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
        if (transaction_driver.escribir[i]==1) begin
          if (transaction_driver.device_dest[i]==8'hFF) begin
            for (int f=0; f<drvrs-1; f++) begin
-		   	temp = new();
-         		temp.enviado=i;
-         		temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
-         		temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
-         		temp.tiempo_lectura=transaction_driver.tiempo_lectura;
-         		cola.push_back(temp);
+              temp = new();
+              temp.enviado=i;
+              temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
+              temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
+              temp.tiempo_lectura=transaction_driver.tiempo_lectura;
+              cola.push_back(temp);
            end
-         end else begin
-	temp = new();
-         temp.enviado=i;
+          end else begin
+            temp = new();
+            temp.enviado=i;
+            temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
+            temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
+            temp.tiempo_lectura=transaction_driver.tiempo_lectura;
+            cola.push_back(temp);
+          end
+        end
+      end
+      if (transaction_driver.reset==1) begin
+        for (int i=0;i<cola.size; i++) begin
+          auxiliar=cola.pop_back;
+          to_sb = new();
+          to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
+          to_sb.tiempo_escritura=0;
+          to_sb.device_dest=auxiliar.Dato[pckg_sz-1:pckg_sz-8];
+          to_sb.latencia=0;
+          to_sb.tiempo_lectura=auxiliar.tiempo_lectura;
+          to_sb.completado = 0;
+          to_sb.valido=0;
+          to_sb.reset = 1;
+          to_sb.device_env=auxiliar.enviado;
+          to_sb.print("Checker:Transaccion Completada");
+          i_checker_scoreboard_mbx.put(to_sb);
+          $display("Dato_abortado= %h, Dispositivo_que_envia = %h, Dispositivo que recibe= %h",auxiliar.Dato[pckg_sz-9:0],auxiliar.enviado,auxiliar.Dato[pckg_sz-1:pckg_sz-8]);
+        end
+      end
+	  end
 
-         temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
-         temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
-         temp.tiempo_lectura=transaction_driver.tiempo_lectura;
-         cola.push_back(temp);
-         end
-       end
-     end
-     if (transaction_driver.reset==1) begin
-       for (int i=0;i<cola.size; i++) begin
-         auxiliar=cola.pop_back;
-	 to_sb = new();
-         to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
-         to_sb.tiempo_escritura=0;
-         to_sb.device_dest=auxiliar.Dato[pckg_sz-1:pckg_sz-8];
-         to_sb.latencia=0;
-         to_sb.tiempo_lectura=auxiliar.tiempo_lectura;
-         to_sb.completado = 0;
-         to_sb.valido=0;
-	 to_sb.reset = 1;
-         to_sb.device_env=auxiliar.enviado;
-         to_sb.print("Checker:Transaccion Completada");
-         i_checker_scoreboard_mbx.put(to_sb);
-         $display("Dato_abortado= %h, Dispositivo_que_envia = %h, Dispositivo que recibe= %h",auxiliar.Dato[pckg_sz-9:0],auxiliar.enviado,auxiliar.Dato[pckg_sz-1:pckg_sz-8]);
-       end
-	end
-	end
-     end
+    foreach (cola[a]) begin
+      if(cola[a].tiempo_lectura > timeout)
+        cola[a].print("Checker: Error timeout de dato");
+        $finish;
+    end
+  end
      endtask 
 endclass 
