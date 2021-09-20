@@ -7,7 +7,7 @@ typedef enum {escritura, reset} tipo_trans;
 // Tipos de secuencias
 typedef enum {trans_aleatoria, trans_especifica, sec_trans_aleatorias, sec_trans_especificas, sec_escrituras_aleatorias, escritura_aleatoria} tipo_sec;
 // Operaciones en Scoreboard
-typedef enum {report_consola, retraso_promedio, reset_ancho_banda, ancho_banda, report_csv, append_txt_min_bw, append_txt_max_bw} sb_transaction;
+typedef enum {retraso_promedio, reset_ancho_banda, report_csv, append_csv_min_bw, append_txt_max_bw} sb_transaction;
 
 
 // Definicion de los paquetes
@@ -133,7 +133,7 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
       this.tipo = 0;
     endfunction
       function void print(string tag);
-        $display("[%g] %s Dato=%g Destino=%g Fuente=%g Valido=%p Completado=%p Escritura=%p Lectura=%p Latencia=%p",,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
+        $display("[%g] %s Dato=%g Destino=%g Fuente=%g Valido=%g Completado=%g Escritura=%g Lectura=%g Latencia=%g",,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
       
     endfunction
 endclass

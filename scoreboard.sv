@@ -4,13 +4,16 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
   test_sb_mbx i_test_sb_mbx;
   checker_scoreboard #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaccion_entrante;
   checker_scoreboard scoreboard[$];
-  checker_scoreboard auxiliar_array[$];  
   checker_scoreboard auxiliar_trans;
   shortreal retardo_promedio;
   sb_transaction orden;
   int tamano_sb = 0;
-  int transacciones_completadas =0;
+  int transacciones_completadas = 0;
+  int transacciones_completados_bw = 0;
   int retardo_total = 0;
+  int tiempo_inicial_bw = 0;
+  int tiempo_final_bw = 0;
+  int reset_bw = 0;
 
     task run;
     $display("[%g] El Score Board fue inicializado",$time);
@@ -22,6 +25,12 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
         if(transaccion_entrante.completado) begin
           retardo_total = retardo_total + transaccion_entrante.latencia;
           transacciones_completadas++;
+          transacciones_completados_bw++;
+          tiempo_final_bw = transaccion_entrante.tiempo_escritura;
+          if(reset_bw) begin
+            tiempo_inicial_bw = transaccion_entrante.tiempo_lectura;
+            reset_bw = 0;
+          end
         end
         scoreboard.push_back(transaccion_entrante);
       end else begin
@@ -33,14 +42,41 @@ class score_board #(parameter drvrs = 4, pckg_sz = 16);
               retardo_promedio = retardo_total/transacciones_completadas;
               $display("[%g] Score board: el retardo promedio es: %0.3f", $time, retardo_promedio);
             end
-            reporte: begin
+            report_csv: begin
               $display("Score Board: Recibida Orden Reporte");
               tamano_sb = this.scoreboard.size();
+              int report_csv_file;
+              report_csv_file = $fopen("min_bandwidth.csv", "w");
+              $fwrite(report_csv_file, "Dato; Destino; Fuente; Valido; Completado; Escritura; Lectura; Latencia\n");
+
               for(int i=0;i<tamano_sb;i++) begin
                 auxiliar_trans = scoreboard.pop_front;
                 auxiliar_trans.print("SB_Report:");
-                auxiliar_array.push_back(auxiliar_trans);
+                $fwrite(report_csv_file, "%g; %g; %g; %g; %g; %g; %g; %g\n",auxiliar_trans.dato,auxiliar_trans.device_dest, auxiliar_trans.device_env, auxiliar_trans.valido, auxiliar_trans.completado, auxiliar_trans.tiempo_escritura, auxiliar_trans.tiempo_lectura, auxiliar_trans.latencia);
               end
+
+              $fclose(report_csv_file);
+            end
+            
+            reset_ancho_banda: begin
+              reset_bw = 1;
+              transacciones_completados_bw = 0;
+              tiempo_inicial_bw = 0;
+              tiempo_final_bw = 0;
+            end
+            append_csv_min_bw: begin
+              int file_min_bw;
+              file_min_bw = $fopen("min_bandwidth.csv", "a");
+              $fwrite(file_min_bw, "Drivers; Pck_sz; Minimun Bandwidth(Gbps)\n");
+              $fwrite(file_min_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
+              $fclose(file_min_bw);
+            end
+            append_txt_max_bw: begin
+              int file_max_bw;
+              file_max_bw = $fopen("max_bandwidth.csv", "a");
+              $fwrite(file_max_bw, "Drivers; Pck_sz; Mi Bandwidth(Gbps)\n");
+              $fwrite(file_max_bw, "%d; %d; %d", drvrs, pckg_sz, (transacciones_completados_bw*pckg_sz)/(tiempo_final_bw-tiempo_inicial_bw));
+              $fclose(file_max_bw);
             end
           endcase
        end
