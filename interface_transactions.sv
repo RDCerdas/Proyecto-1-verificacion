@@ -175,19 +175,19 @@ endclass
 // Definicion de las mailboxes
 
 // Mailbox entre agente y driver
-typedef mailbox #(trans_bus) agent_driver_mbx;
+typedef mailbox #(trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs))) agent_driver_mbx;
 
 // Mailbox entre driver y checker
-typedef mailbox #(trans_bus) driver_checker_mbx;
+typedef mailbox #(trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs))) driver_checker_mbx;
 
 // Mailbox entre monitor y checker
-typedef mailbox #(monitor_checker) monitor_checker_mbx;
+typedef mailbox #(monitor_checker #(.pckg_sz(pckg_sz), .drvrs(drvrs))) monitor_checker_mbx;
 
 // Mailbow entre checker y scoreboard
-typedef mailbox #(checker_scoreboard) checker_scoreboard_mbx;
+typedef mailbox #(checker_scoreboard #(.pckg_sz(pckg_sz), .drvrs(drvrs))) checker_scoreboard_mbx;
 
 // Mailbox entre agente y test
-typedef mailbox #(test_agent) test_agent_mbx;
+typedef mailbox #(test_agent #(.pckg_sz(pckg_sz), .drvrs(drvrs))) test_agent_mbx;
 
 // Mailbox entre test y scoreboard
 typedef mailbox #(sb_transaction) test_sb_mbx;

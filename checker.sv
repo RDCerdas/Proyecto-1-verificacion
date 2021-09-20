@@ -8,6 +8,10 @@ class arreglo #(parameter pckg_sz = 16);
         this.enviado=0;
     endfunction 
 
+    function print(string tag);
+	$display("[%g] %s  Tiempo Lectura = %g Enviado = %g Dato = %h", $time, tag, this.tiempo_lectura, this.enviado, this.Dato);
+    endfunction
+
 endclass 
 
 class checkers #(parameter drvrs = 4,  pckg_sz = 16);
@@ -77,7 +81,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
      foreach (transaction_driver.escribir[i]) begin
        if (transaction_driver.escribir[i]==1) begin
          if (transaction_driver.device_dest[i]==8'hFF) begin
-           for (int f=0; f<drvrs-1; f++) begin
+           for (int f=0; f<(drvrs-1); f++) begin
               temp = new();
               temp.enviado=i;
               temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
@@ -96,7 +100,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
         end
       end
       if (transaction_driver.reset==1) begin
-        for (int i=0;i<cola.size; i++) begin
+        while(cola.size()>0) begin
           auxiliar=cola.pop_back;
           to_sb = new();
           to_sb.dato=auxiliar.Dato[pckg_sz-9:0];
@@ -116,9 +120,10 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
 	  end
 
     foreach (cola[a]) begin
-      if(cola[a].tiempo_lectura > timeout)
+	    if(cola[a].tiempo_lectura+timeout < $time) begin
         cola[a].print("Checker: Error timeout de dato");
         $finish;
+end
     end
   end
      endtask 
