@@ -2,8 +2,6 @@
 // Definici�n del tipo de transacciones posibles en la fifo //
 //////////////////////////////////////////////////////////////
 
-// Tipos de operaciones
-typedef enum {escritura, reset} tipo_trans; 
 // Tipos de secuencias
 typedef enum {trans_aleatoria, trans_especifica, sec_trans_aleatorias, sec_trans_especificas, sec_escrituras_aleatorias, escritura_aleatoria} tipo_sec;
 // Operaciones en Scoreboard
@@ -107,16 +105,16 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
   	int valido;
   	int completado;
     bit [pckg_sz-1:0] dato;
-    tipo_trans tipo;
+    bit reset;
 
-    function new(bit [pckg_sz-1:0] dto = 0, int t_escritura = 0, int t_lectura = 0, int lat = 0, int dev_env = 0, int dev_dest = 0, tipo_trans tp = reset);
+    function new(bit [pckg_sz-1:0] dto = 0, int t_escritura = 0, int t_lectura = 0, int lat = 0, int dev_env = 0, int dev_dest = 0);
       this.dato = dto;
+      this.reset = 0;
       this.tiempo_escritura = t_escritura;
       this.tiempo_lectura = t_lectura;
       this.latencia = lat;
       this.device_env = dev_env;
       this.device_dest = dev_dest;
-      this.tipo = tp;
       this.completado=0;
       this.valido=0;
     endfunction
@@ -130,10 +128,10 @@ class checker_scoreboard #(parameter pckg_sz = 16, drvrs = 4);
       this.latencia = 0;
       this.device_dest = 0;
       this.device_env = 0;
-      this.tipo = 0;
+      this.reset = 0;
     endfunction
       function void print(string tag);
-        $display("[%g] %s Dato=%h Destino=%g Fuente=%g Valido=%g Completado=%g Escritura=%g Lectura=%g Latencia=%g", $time() ,tag ,this.dato,this.device_dest, this.device_env, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
+        $display("[%g] %s Dato=%h Destino=%g Fuente=%g reset=%g Valido=%g Completado=%g Escritura=%g Lectura=%g Latencia=%g", $time() ,tag ,this.dato,this.device_dest, this.device_env, this.reset, this.valido, this.completado, this.tiempo_escritura, this.tiempo_lectura, this.latencia);
       
     endfunction
 endclass

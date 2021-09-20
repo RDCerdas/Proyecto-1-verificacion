@@ -50,19 +50,19 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
 
 
         instruccion = new();
-        instruccion.num_transacciones = num_transacciones;
+        instruccion.num_transacciones = 100;
       	instruccion.max_retardo = max_retardo;
         instruccion.tipo_secuencia = sec_escrituras_aleatorias;
         test_agent_mbx_inst.put(instruccion);
         $display("[%g]  Test: Enviada cuarta instruccion al agente escrituras_aleatorias",$time);
 		
-	#5000000;
+	#100000;
 
 	test_sb_mbx_inst.put(reset_ancho_banda);
 
 
         instruccion = new();
-        instruccion.num_transacciones = 25;
+        instruccion.num_transacciones = 60;
       	instruccion.max_retardo = 1;
         instruccion.tipo_secuencia = sec_escrituras_aleatorias;
         test_agent_mbx_inst.put(instruccion);
@@ -76,7 +76,7 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
 	test_sb_mbx_inst.put(reset_ancho_banda);
 
         instruccion = new();
-        instruccion.num_transacciones = 25;
+        instruccion.num_transacciones = 60;
       	instruccion.max_retardo = 1;
         instruccion.tipo_secuencia = sec_trans_especificas;
         instruccion.enviar_dato_especifico(0, 'hFF, 'h1); //Se envía dato 0xFF desde dispositivo 1 a 4
@@ -84,10 +84,14 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         $display("[%g]  Test: Enviada tercera instruccion al agente transacciones_especificas",$time);
 
 
-	#10000;
+	#100000;
 
 	test_sb_mbx_inst.put(append_csv_min_bw);
 	test_sb_mbx_inst.put(report_csv);
+
+	#50;
+       
+	$finish();
     endtask
 
 endclass //test 
