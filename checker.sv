@@ -1,7 +1,7 @@
-class arreglo #(parameter pckg_sz = 16);
-  bit [pckg_sz-1:0] Dato ;
-  bit [8:0] enviado;
-  int tiempo_lectura;
+class arreglo #(parameter pckg_sz = 16); //se agrega una clase de los parametros que se van a usar para la cola 
+  bit [pckg_sz-1:0] Dato ; //dato con el destino/dato
+  bit [8:0] enviado;		//dispositivo que envia
+  int tiempo_lectura;		//tiempo de lectura del driver
       function new();
         this.tiempo_lectura=0;
         this.Dato = 0; 
@@ -23,7 +23,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
   checker_scoreboard_mbx i_checker_scoreboard_mbx;
   arreglo #(.pckg_sz(pckg_sz)) auxiliar;
   arreglo #(.pckg_sz(pckg_sz))temp;
-  arreglo #(.pckg_sz(pckg_sz))cola[$];
+  arreglo #(.pckg_sz(pckg_sz))cola[$]; //cola para que almacene transacciones del driver
   int latencia;
   int tamano;
   bit [pckg_sz-1:0] Dato;
@@ -43,13 +43,13 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
 	   #5;
 	   
 	if(i_monitor_checker_mbx.try_get(transaction_monitor)) begin
-       foreach (transaction_monitor.valid[i]) begin
-         if (transaction_monitor.valid[i]==1) begin
+      foreach (transaction_monitor.valid[i]) begin
+        if (transaction_monitor.valid[i]==1) begin//si la transaccion del monitor es valido entonces se procude a buscar el dato enviado por el driver
            Dato=transaction_monitor.dato[i];
            tamano=0;
            foreach (cola[a]) begin
 		  $display("Dato = %h Cola = %h", Dato, cola[a].Dato);
-		  if (Dato==cola[a].Dato) begin
+             if (Dato==cola[a].Dato) begin //si el dato recibido por el monitor es igual al que envio el checker se realiza la transaccion al scoreboard
 
 		   to_sb = new();
            	   latencia = transaction_monitor.tiempo_escritura - cola[a].tiempo_lectura;
@@ -69,7 +69,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
 		   break;
              end
            end
-           if (tamano==0) begin
+          if (tamano==0) begin//si el dato no se encontró se finaliza el test
            	 transaction_monitor.print("Checker: El dato recibido por el monitor no fue enviado por el driver");
          	   $finish(1);
            end
@@ -78,8 +78,8 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
        end
        if(i_driver_checker_mbx.try_get(transaction_driver))begin
      transaction_driver.print("Checker: Se recibe trasacción desde el driver");
-     foreach (transaction_driver.escribir[i]) begin
-       if (transaction_driver.escribir[i]==1) begin
+         foreach (transaction_driver.escribir[i]) begin
+           if (transaction_driver.escribir[i]==1) begin//la transaccion que tenga el escribir en otro dispositivo  se analiza si es un broadcast o una escritura normal, en ambos casos se almacena la transaccion en la cola para su uso posterior
          if (transaction_driver.device_dest[i]==8'hFF) begin
            for (int f=0; f<(drvrs-1); f++) begin
               temp = new();
@@ -99,7 +99,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
           end
         end
       end
-      if (transaction_driver.reset==1) begin
+         if (transaction_driver.reset==1) begin //en el caso de un reset de hace pop a los datos almacenados en el cola enviando las transacciones al scoroboard que fueron invalidados
         while(cola.size()>0) begin
           auxiliar=cola.pop_back;
           to_sb = new();
@@ -128,3 +128,4 @@ end
   end
      endtask 
 endclass 
+
