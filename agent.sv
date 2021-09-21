@@ -18,7 +18,7 @@ class agent #(parameter pckg_sz = 16, drvrs = 4);
         i_test_agent_mbx.get(instruccion);
         this.num_transacciones = instruccion.num_transacciones;
         this.max_retardo = instruccion.max_retardo;
-
+        // Case para realizar las diferentes instrucciones
         case(instruccion.tipo_secuencia)
           trans_aleatoria: begin  // Esta instrucción genera una única instruccion aleatoria
             transaccion = new();
@@ -80,7 +80,7 @@ class agent #(parameter pckg_sz = 16, drvrs = 4);
 
           end
 
-          escritura_aleatoria: begin
+          escritura_aleatoria: begin // Esta instrucción hace una escritura aleatoria en todos los canales
             transaccion = new();
             transaccion.max_retardo = this.max_retardo;
             transaccion.randomize();

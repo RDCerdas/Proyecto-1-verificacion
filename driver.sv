@@ -18,6 +18,7 @@ class driver_fifo #(parameter pckg_sz = 16, fifo_depth = 16);
 
     endfunction //new()
 
+    // Función de actualización de los valores, se corre cada ciclo de reloj
     function void update();
     	this.overflow = 0;
       // Si hay señal de reset se vacía el fifo
@@ -43,8 +44,14 @@ class driver_fifo #(parameter pckg_sz = 16, fifo_depth = 16);
       else
           this.D_pop = emul_fifo[0];
 
+      // Actualización de overflow
+      if (emul_fifo.size()==fifo_depth) begin
+          this.overflow = 1;
+      end
+
     endfunction
 
+    // Función para guardar dato en fifo, toma en cuenta los overflows
     function void write(bit [pckg_sz-1:0] dato, bit escribir);
       if (escribir) begin
 		    if (emul_fifo.size()==fifo_depth) begin
@@ -89,6 +96,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
       forever begin
         @(posedge vif.clk);
         valid_transaction = 0;
+        // Actualización de todos los fifos
         foreach (drivers_fifo[i]) begin
           drivers_fifo[i].pop = vif.pop[0][i];
           drivers_fifo[i].rst = vif.reset;
@@ -98,11 +106,13 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
           vif.pndng[0][i] = drivers_fifo[i].pndng;
         end
 
+        // Si hay un pop en 1 se genera transacción
         foreach (drivers_fifo[i]) begin 
           // Si hay algún pop
           if (vif.pop[0][i]) 
             valid_transaction = 1;
           // Detector de flancos
+          // En caso de detectar flanco negativo en reset se crea transacción
           if (~vif.reset && reset_temp)
             valid_transaction = 1;
         end
@@ -113,6 +123,7 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         if(valid_transaction) begin
           trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction_checker;
           transaction_checker = new();
+          // Se genera una transacción con la información de cada canal
           foreach (drivers_fifo[i]) begin
             transaction_checker.dato[i] = this.dato_temp[i][pckg_sz-9:0];
             transaction_checker.device_dest[i] = this.dato_temp[i][pckg_sz-1:pckg_sz-8];
@@ -124,9 +135,10 @@ class driver #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
             i_driver_checker_mbx.put(transaction_checker);
         end
 
-          
+        // Variable temporal para detección de flancos del reset
         reset_temp = vif.reset;
         
+  // Lógica no bloqueante para para implementar el retraso y recibir instrucciones del agente
 	if(espera >= espera_total) begin
           trans_bus #(.pckg_sz(pckg_sz), .drvrs(drvrs)) transaction; 
           vif.reset = 0;

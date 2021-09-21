@@ -21,12 +21,16 @@ class trans_bus #(parameter pckg_sz = 16, drvrs = 4);
     int max_retardo;
 
 
+  // Constraint del retardo
     constraint const_retardo {retardo <= max_retardo; retardo> 0;}
-
+  
+  // Constraint de los dispositivos de destino
   constraint const_device_dest { foreach(device_dest[i]){device_dest[i] inside{[0:drvrs-1], {8{1'b1}}}; device_dest[i]!=i;}}
 
-  constraint reset_prop {reset dist{0:=70, 1:=30};}
+  // Probabilidad de reset
+  constraint reset_prop {reset dist{0:=80, 1:=20};}
 
+  // Probabilidad de escribir, para reducir que se produzca una gran cantida de reset
   constraint escribir_prop {foreach(escribir[i])escribir[i] dist{0:=70, 1:=30};}
 
   function new(int ret = 0, bit rst = 0, int max_retardo = 5);
