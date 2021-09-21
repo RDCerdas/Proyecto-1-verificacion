@@ -50,8 +50,7 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
            foreach (cola[a]) begin
 		  $display("Dato = %h Cola = %h", Dato, cola[a].Dato);
              if (Dato==cola[a].Dato) begin //si el dato recibido por el monitor es igual al que envio el checker se realiza la transaccion al scoreboard
-
-		   to_sb = new();
+		           to_sb = new();
            	   latencia = transaction_monitor.tiempo_escritura - cola[a].tiempo_lectura;
            	   to_sb.dato=Dato;
            	   to_sb.tiempo_escritura=transaction_monitor.tiempo_escritura;
@@ -60,13 +59,13 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
            	   to_sb.tiempo_lectura=cola[a].tiempo_lectura;
            	   to_sb.completado = 1;
            	   to_sb.valido=1;
-		   to_sb.reset = 0;
+		           to_sb.reset = 0;
            	   to_sb.device_env=cola[a].enviado;
            	   to_sb.print("Checker:Transaccion Completada");
            	   i_checker_scoreboard_mbx.put(to_sb);
            	   tamano=1;
-		   cola.delete(a);
-		   break;
+		           cola.delete(a);
+		           break;
              end
            end
           if (tamano==0) begin//si el dato no se encontró se finaliza el test
@@ -80,23 +79,26 @@ class checkers #(parameter drvrs = 4,  pckg_sz = 16);
      transaction_driver.print("Checker: Se recibe trasacción desde el driver");
          foreach (transaction_driver.escribir[i]) begin
            if (transaction_driver.escribir[i]==1) begin//la transaccion que tenga el escribir en otro dispositivo  se analiza si es un broadcast o una escritura normal, en ambos casos se almacena la transaccion en la cola para su uso posterior
-         if (transaction_driver.device_dest[i]==8'hFF) begin
-           for (int f=0; f<(drvrs-1); f++) begin
-              temp = new();
-              temp.enviado=i;
-              temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
-              temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
-              temp.tiempo_lectura=transaction_driver.tiempo_lectura;
-              cola.push_back(temp);
-           end
-          end else begin
-            temp = new();
-            temp.enviado=i;
-            temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
-            temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
-            temp.tiempo_lectura=transaction_driver.tiempo_lectura;
-            cola.push_back(temp);
-          end
+            if((transaction_driver.device_dest[i]< drvrs)||(transaction_driver.device_dest[i] == 'hff)) begin
+                if (transaction_driver.device_dest[i]==8'hFF) begin
+
+                  for (int f=0; f<(drvrs-1); f++) begin
+                    temp = new();
+                    temp.enviado=i;
+                    temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
+                    temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
+                    temp.tiempo_lectura=transaction_driver.tiempo_lectura;
+                    cola.push_back(temp);
+                  end
+              end else begin
+                temp = new();
+                temp.enviado=i;
+                temp.Dato[pckg_sz-9:0]=transaction_driver.dato[i];
+                temp.Dato[pckg_sz-1:pckg_sz-8]=transaction_driver.device_dest[i];
+                temp.tiempo_lectura=transaction_driver.tiempo_lectura;
+                cola.push_back(temp);
+              end
+         end
         end
       end
          if (transaction_driver.reset==1) begin //en el caso de un reset de hace pop a los datos almacenados en el cola enviando las transacciones al scoroboard que fueron invalidados
