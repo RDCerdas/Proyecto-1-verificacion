@@ -34,7 +34,7 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         instruccion = new();
         instruccion.num_transacciones = 5;
       	instruccion.retardo = 10;
-        instruccion.tipo_secuencia = sec_trans_especifica;
+        instruccion.tipo_secuencia = sec_trans_especificas;
         instruccion.enviar_dato_especifico(0, 'hAA, 'hff); //Se envía dato 0x10 desde dispositivo 0 a 2
         test_agent_mbx_inst.put(instruccion);
         $display("[%g]  Test: Enviada segunda instruccion al agente broadcast 1 dispositivo",$time);
@@ -42,7 +42,7 @@ class test #(parameter drvrs = 4, pckg_sz = 16, bits = 0, fifo_depth = 16);
         instruccion = new();
         instruccion.num_transacciones = 5;
       	instruccion.retardo = 10;
-        instruccion.tipo_secuencia = sec_trans_especifica;
+        instruccion.tipo_secuencia = sec_trans_especificas;
         for(int i; i < drvrs; i++) begin
           instruccion.enviar_dato_especifico(i, 'hFF, 'hff); //Se envía dato 0x10 desde dispositivo 0 a 2
         end
